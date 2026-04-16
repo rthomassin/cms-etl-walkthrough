@@ -5,6 +5,7 @@ import { pipelineNodes, pipelineEdges } from '../../scenarios/pipeline';
 import StageNode, { type StageNodeData } from './StageNode';
 import Token from './Token';
 import Tooltip from './Tooltip';
+import Legend from './Legend';
 import { useStore, getActiveScenario } from '../../engine/store';
 import { useScheduler } from '../../engine/scheduler';
 
@@ -68,6 +69,7 @@ export default function FlowCanvas() {
       </ReactFlow>
       <Token />
       <Tooltip />
+      <Legend />
     </div>
   );
 }
