@@ -6,10 +6,13 @@
 // Arial (the template's native font) is retained in fallback stacks.
 
 export const colors = {
-  // Brand
-  brandPrimary:   '#2850F0', // Alstom Blue — accents, actions, active states
-  brandSecondary: '#DC3223', // Alstom Red  — the data-packet "hero"
+  // Brand (values taken from the Alstom PowerPoint theme)
+  brandPrimary:   '#2850F0', // Alstom Blue   — accents, actions, active states
+  brandSecondary: '#DC3223', // Alstom Red    — the data-packet "hero" / wordmark "a"
+  brandNavy:      '#1E3246', // Alstom Navy   — strong surfaces, wordmark body
+  brandNavyDeep:  '#142846', // Alstom Deep   — footer bar, emphasis background
   brandAccent:    '#9646DC', // purple, occasional
+  brandGreen:     '#78C86E', // Alstom Green — success / "ready"
 
   // Paper & ink (editorial neutrals, replace generic greys)
   paper:     '#F4F1EC', // warm off-white, newsprint feel

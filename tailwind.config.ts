@@ -9,7 +9,10 @@ export default {
         brand: {
           primary:   colors.brandPrimary,
           secondary: colors.brandSecondary,
+          navy:      colors.brandNavy,
+          navyDeep:  colors.brandNavyDeep,
           accent:    colors.brandAccent,
+          green:     colors.brandGreen,
         },
         paper: {
           DEFAULT: colors.paper,

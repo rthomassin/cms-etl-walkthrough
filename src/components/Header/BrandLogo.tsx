@@ -1,13 +1,15 @@
+// Alstom wordmark lockup + product name.
+//
+// The wordmark SVG is lifted verbatim from the official Alstom PowerPoint
+// template (`Alstom New Template.pptx` → ppt/media/image2.svg). The "a" is
+// Alstom Red (#DC3223); the rest of the wordmark is Alstom Navy (#1E3246).
 export default function BrandLogo() {
   return (
-    <div className="flex items-center gap-3">
-      {/* Minimal geometric mark — blue rectangle with a red accent notch. */}
-      <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden className="flex-none">
-        <rect x="1" y="1" width="20" height="20" rx="2" fill="#2850F0" />
-        <rect x="13" y="13" width="6" height="6" rx="1" fill="#DC3223" />
-      </svg>
+    <div className="flex items-center gap-4">
+      <AlstomWordmark className="h-[22px] w-auto flex-none" />
+      <span aria-hidden className="h-6 w-px bg-paper-rule" />
       <div className="flex items-baseline gap-2">
-        <span className="font-display text-[18px] font-medium text-ink tracking-tight2 leading-none">
+        <span className="font-display text-[18px] font-medium text-brand-navy tracking-tight2 leading-none">
           CMS Pipeline
         </span>
         <span className="font-mono text-[9.5px] uppercase tracking-wide3 text-ink-faint">
@@ -15,5 +17,30 @@ export default function BrandLogo() {
         </span>
       </div>
     </div>
+  );
+}
+
+function AlstomWordmark({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 1190 231"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      role="img"
+      aria-label="Alstom"
+    >
+      <g transform="translate(295 -75)">
+        <path
+          fill="#DC3223"
+          fillRule="evenodd"
+          d="M660.852 131.089 649.121 143.528C668.055 173.287 670.735 211.247 653.093 242.942L659.558 242.942C681.449 207.378 681.079 164.903 660.852 131.089ZM609.406 138.183 615.779 131.458C583.914 102.066 531.082 102.711 500.325 134.221 481.945 153.017 473.355 178.171 477.512 201.849L483.885 201.665C484.254 168.589 511.316 141.408 545.491 140.671 580.404 139.749 609.406 166.377 610.145 200.375 611.068 234.465 583.729 262.567 548.816 263.488 532.191 263.949 516.027 257.96 503.743 246.72L494.691 256.025C455.437 220.185 452.666 159.375 488.596 120.125 489.335 119.296 490.166 118.467 490.904 117.637 521.661 86.035 568.858 78.8479 607.004 96.4461L607.466 96.9985 612.361 91.5632C563.778 63.461 499.771 71.3852 458.854 113.307 410.549 162.692 412.765 240.638 463.565 287.535L472.709 278.23C492.752 296.565 516.119 305.779 543.274 304.95 598.137 303.476 641.548 259.157 640.162 205.812 639.516 180.014 628.34 155.597 609.313 138.183L609.313 138.183Z"
+        />
+        <path
+          fill="#1E3246"
+          fillRule="evenodd"
+          d="M-17.8629 95.9325-64.0371 95.9325-64.0371 282.912 66.7281 282.912 66.7281 246.568-17.8629 246.568-17.8629 95.9325-17.8629 95.9325ZM-223.338 95.9325-295 282.912-250.303 282.912C-242.177 255.147-206.715 234.115-173.747 231.255L-180.58 214.374C-194.433 212.531-214.842 214.744-227.217 220.094L-197.019 141.041-138.469 283.005-93.8649 283.005-170.976 96.0255-223.43 96.0255ZM241.544 132.092 303.048 132.092 303.048 282.82 350.33 282.82 350.33 132.092 412.111 132.092 412.111 95.9325 241.451 95.9325 241.451 132.092 241.451 132.092ZM853.813 95.9325 799.79 166.961 746.505 95.9325 705.04 95.9325 705.04 282.912 752.322 282.912 752.322 168.714 796.649 229.135 803.391 229.135 847.625 168.714 847.625 282.912 895.001 282.912 895.001 95.9325 853.905 95.9325ZM128.14 143.9C128.14 128.865 162.309 115.765 215.501 134.86L218.549 97.9624C210.145 94.2726 186.227 88 168.035 88 129.249 88 85.2909 102.298 85.2909 148.697 85.2909 218.341 189.367 194.543 186.412 232.547 185.303 247.306 163.233 250.904 144.578 250.904 123.43 250.904 104.406 246.661 91.5705 240.572L87.1369 280.698C104.314 286.233 126.663 289.001 144.578 289.001 187.52 289.001 229.354 275.533 229.538 225.537 229.538 158.752 128.047 178.215 128.047 143.9Z"
+        />
+      </g>
+    </svg>
   );
 }
