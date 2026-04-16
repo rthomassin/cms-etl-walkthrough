@@ -4,6 +4,7 @@ import '@xyflow/react/dist/style.css';
 import { pipelineNodes, pipelineEdges } from '../../scenarios/pipeline';
 import StageNode, { type StageNodeData } from './StageNode';
 import Token from './Token';
+import Tooltip from './Tooltip';
 import { useStore, getActiveScenario } from '../../engine/store';
 import { useScheduler } from '../../engine/scheduler';
 
@@ -66,6 +67,7 @@ export default function FlowCanvas() {
         <Background gap={24} />
       </ReactFlow>
       <Token />
+      <Tooltip />
     </div>
   );
 }
