@@ -5,6 +5,10 @@ node_modules/
 dist/
 .vite/
 
+# Test coverage + TS incremental build info
+coverage/
+*.tsbuildinfo
+
 # Env / secrets
 .env
 .env.local

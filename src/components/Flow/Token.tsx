@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import { useViewport } from '@xyflow/react';
 import { useStore, getActiveScenario } from '../../engine/store';
-import { getNode } from '../../scenarios/pipeline';
+import { getNode, NODE_WIDTH, NODE_HEIGHT } from '../../scenarios/pipeline';
 
 /** A straight-line interpolation is enough — React Flow renders curved edges,
  *  but for the token we just need a visually smooth motion between node centers. */
@@ -15,14 +16,17 @@ function interpolate(
   };
 }
 
-/** Node width 176 (w-44), height 80 (h-20) — center offset. */
-const CENTER = { x: 88, y: 40 };
+const CENTER = { x: NODE_WIDTH / 2, y: NODE_HEIGHT / 2 };
 
 export default function Token() {
   const playing    = useStore(s => s.playing);
   const speed      = useStore(s => s.speed);
   const stepIndex  = useStore(s => s.stepIndex);
   const scenarioId = useStore(s => s.activeScenario);
+  const laborRow   = useStore(s => s.laborRow);
+
+  // React Flow's viewport transform — needed to map diagram coords to screen coords.
+  const viewport = useViewport();
 
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   const rafRef = useRef<number | null>(null);
@@ -60,10 +64,29 @@ export default function Token() {
 
   if (!pos) return null;
 
+  // Map diagram coords → screen coords via React Flow viewport transform.
+  const screenX = viewport.x + pos.x * viewport.zoom;
+  const screenY = viewport.y + pos.y * viewport.zoom;
+
+  // Short value label on the capsule: prefer employeeId if set, else hours.
+  const label =
+    laborRow.employeeId ? `ID ${laborRow.employeeId}` :
+    laborRow.hours !== undefined ? `${laborRow.hours}h` :
+    '•';
+
   return (
     <div
-      className="pointer-events-none absolute w-4 h-4 rounded-full bg-token-fill shadow-md z-10 -translate-x-1/2 -translate-y-1/2"
-      style={{ left: pos.x, top: pos.y }}
-    />
+      className="pointer-events-none absolute z-20 -translate-x-1/2 -translate-y-1/2"
+      style={{ left: screenX, top: screenY }}
+    >
+      <div className="relative flex items-center justify-center">
+        {/* Glow halo */}
+        <div className="absolute inset-0 -m-3 rounded-full bg-brand-secondary/30 blur-md token-pulse" />
+        {/* Capsule with value */}
+        <div className="relative px-2.5 py-1 rounded-full bg-brand-secondary text-white font-mono text-[10px] font-semibold tracking-wide2 shadow-paperSm ring-2 ring-paper">
+          {label}
+        </div>
+      </div>
+    </div>
   );
 }

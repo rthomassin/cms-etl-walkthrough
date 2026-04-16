@@ -2,5 +2,69 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ---- Base / paper feel ---- */
+
 html, body, #root { height: 100%; }
-body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, sans-serif; }
+
+body {
+  margin: 0;
+  font-family: "Geist", "Arial", -apple-system, system-ui, sans-serif;
+  color: #14192A;
+  background-color: #F4F1EC;
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Subtle newsprint grain texture on the app background */
+#root::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+/* Let React Flow inherit ink color so its internal styles read */
+.react-flow__renderer,
+.react-flow__node,
+.react-flow__edge { color: #14192A; }
+
+/* Hairline rule utility — for blueprint/editorial dividers */
+.rule-hair { border-color: #D8D0C0; }
+
+/* --- token pulse animation --- */
+@keyframes tokenPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220,50,35,0.45), 0 0 18px 3px rgba(220,50,35,0.40); }
+  50%      { box-shadow: 0 0 0 6px rgba(220,50,35,0.00), 0 0 22px 6px rgba(220,50,35,0.28); }
+}
+.token-pulse { animation: tokenPulse 1.6s ease-in-out infinite; }
+
+/* --- edge march for conditional branches --- */
+@keyframes dashMarch {
+  to { stroke-dashoffset: -16; }
+}
+.edge-march path { stroke-dasharray: 6 4; animation: dashMarch 0.9s linear infinite; }
+
+/* --- staggered entrance for stages/nodes on load --- */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.rise-in { animation: rise 420ms cubic-bezier(0.2, 0.6, 0.2, 1) both; }
+
+/* --- subtle breathing for the active node --- */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.015); }
+}
+.breathe { animation: breathe 2.4s ease-in-out infinite; }
+
+/* --- context panel text crossfade --- */
+@keyframes softFade {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.soft-fade { animation: softFade 260ms ease-out both; }
