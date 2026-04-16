@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -6,6 +6,7 @@ import {
   BackgroundVariant,
   type Node,
   type Edge,
+  type NodeMouseHandler,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import {
@@ -14,18 +15,15 @@ import {
   NODE_WIDTH,
   NODE_HEIGHT,
   STAGE_LABELS,
+  getPredecessors,
+  getSuccessors,
 } from '../../scenarios/pipeline';
 import type { Stage } from '../../scenarios/types';
 import StageNode, { type StageNodeData } from './StageNode';
-import Token from './Token';
-import { useStore, getActiveScenario } from '../../engine/store';
-import { useScheduler } from '../../engine/scheduler';
+import { useStore } from '../../engine/store';
 
 const nodeTypes = { stage: StageNode };
 
-/** Small horizontal stage-legend strip pinned above the canvas. Shows the
- *  four stages in order — each with a dot in its accent color. Node top-
- *  accent bars encode the same color, so the legend ties them together. */
 const STAGE_ORDER: Stage[] = ['source', 'cleaning', 'consolidation', 'upload'];
 const STAGE_DOT: Record<Stage, string> = {
   source:        'bg-[#A58B4E]',
@@ -52,68 +50,110 @@ function StageLegend() {
   );
 }
 
+/** Small hint at bottom of the canvas telling the user they can click. */
+function ClickHint({ show }: { show: boolean }) {
+  if (!show) return null;
+  return (
+    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 px-4 py-2 rounded-full bg-ink/85 backdrop-blur-sm text-paper font-sans text-[12px] shadow-paperLg">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
+        <path d="M7 2v5l3 3" stroke="currentColor" strokeWidth="1.5" fill="none" />
+        <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.2" fill="none" />
+      </svg>
+      Click any step to see what it does
+    </div>
+  );
+}
+
 function CanvasInner() {
-  useScheduler();
+  const selectedNodeId = useStore(s => s.selectedNodeId);
+  const selectNode = useStore(s => s.actions.selectNode);
 
-  const stepIndex = useStore(s => s.stepIndex);
-  const activeScenarioId = useStore(s => s.activeScenario);
+  // Precompute connection maps for the selected node. Works whether or not
+  // the scenario visits it — pipeline edges define the structural graph.
+  const { inputIds, outputIds } = useMemo(() => {
+    if (selectedNodeId === null) return { inputIds: new Set<number>(), outputIds: new Set<number>() };
+    return {
+      inputIds:  new Set(getPredecessors(selectedNodeId)),
+      outputIds: new Set(getSuccessors(selectedNodeId)),
+    };
+  }, [selectedNodeId]);
 
-  const activeNodeId = useMemo(() => {
-    const scenario = getActiveScenario();
-    if (stepIndex === 0) return null;
-    return scenario.steps[stepIndex - 1]?.to ?? null;
-  }, [stepIndex, activeScenarioId]);
+  const onNodeClick: NodeMouseHandler = useCallback((_event, node) => {
+    const id = Number(node.id);
+    // Clicking the selected node deselects.
+    if (id === selectedNodeId) {
+      selectNode(null);
+    } else {
+      selectNode(id);
+    }
+  }, [selectedNodeId, selectNode]);
 
-  const visitedEdgeId = useMemo(() => {
-    if (stepIndex === 0) return null;
-    const scenario = getActiveScenario();
-    const step = scenario.steps[stepIndex - 1];
-    if (!step || step.from === null || step.from === step.to) return null;
-    return `${step.from}-${step.to}`;
-  }, [stepIndex, activeScenarioId]);
+  const onPaneClick = useCallback(() => {
+    // Clicking empty canvas deselects
+    if (selectedNodeId !== null) selectNode(null);
+  }, [selectedNodeId, selectNode]);
 
   const nodes: Node<StageNodeData>[] = useMemo(
-    () => pipelineNodes.map(n => ({
-      id: String(n.id),
-      type: 'stage',
-      position: n.position,
-      draggable: false,
-      selectable: false,
-      data: {
-        label: n.label,
-        stage: n.stage,
-        nodeNumber: n.id,
-        conditional: n.conditional,
-        isActive: activeNodeId === n.id,
-      },
-    })),
-    [activeNodeId]
+    () => pipelineNodes.map(n => {
+      const isSelected = selectedNodeId === n.id;
+      const isInput    = inputIds.has(n.id);
+      const isOutput   = outputIds.has(n.id);
+      const isDimmed   = selectedNodeId !== null && !isSelected && !isInput && !isOutput;
+      return {
+        id: String(n.id),
+        type: 'stage',
+        position: n.position,
+        draggable: false,
+        data: {
+          label: n.label,
+          stage: n.stage,
+          nodeNumber: n.id,
+          conditional: n.conditional,
+          isSelected,
+          isInput,
+          isOutput,
+          isDimmed,
+        },
+      };
+    }),
+    [selectedNodeId, inputIds, outputIds]
   );
 
   const edges: Edge[] = useMemo(
     () => pipelineEdges.map(e => {
-      const isActive = visitedEdgeId === e.id;
+      const isIncomingToSelected = selectedNodeId !== null && e.to === selectedNodeId;
+      const isOutgoingFromSelected = selectedNodeId !== null && e.from === selectedNodeId;
+      const isRelevant = isIncomingToSelected || isOutgoingFromSelected;
       const isConditional = e.id === '9-10' || e.id === '10-11';
+      const isDimmed = selectedNodeId !== null && !isRelevant;
+
+      let stroke = '#B5A98F';
+      let strokeWidth = 1.5;
+      if (isIncomingToSelected) { stroke = '#3F8B4F'; strokeWidth = 2.5; }  // green in
+      if (isOutgoingFromSelected) { stroke = '#DC3223'; strokeWidth = 2.5; } // red out
+
       return {
         id: e.id,
         source: String(e.from),
         target: String(e.to),
         type: 'smoothstep',
-        animated: isActive,
+        animated: isRelevant,
         style: {
-          stroke: isActive ? '#2850F0' : '#B5A98F',
-          strokeWidth: isActive ? 2.5 : 1.5,
-          strokeDasharray: isConditional && !isActive ? '6 4' : undefined,
+          stroke,
+          strokeWidth,
+          strokeDasharray: isConditional && !isRelevant ? '6 4' : undefined,
+          opacity: isDimmed ? 0.35 : 1,
+          transition: 'stroke 220ms, stroke-width 220ms, opacity 220ms',
         },
       };
     }),
-    [visitedEdgeId]
+    [selectedNodeId]
   );
 
   return (
     <div className="relative w-full h-full bg-paper overflow-hidden">
-      {/* Stage legend strip */}
       <StageLegend />
+      <ClickHint show={selectedNodeId === null} />
 
       <ReactFlow
         nodes={nodes}
@@ -128,6 +168,8 @@ function CanvasInner() {
         maxZoom={1.6}
         proOptions={{ hideAttribution: true }}
         defaultEdgeOptions={{ type: 'smoothstep' }}
+        onNodeClick={onNodeClick}
+        onPaneClick={onPaneClick}
       >
         <Background
           variant={BackgroundVariant.Dots}
@@ -137,10 +179,6 @@ function CanvasInner() {
         />
       </ReactFlow>
 
-      {/* Token rides on top, in screen coords, viewport-aware */}
-      <Token />
-
-      {/* Make NODE_WIDTH/HEIGHT available to CSS if ever needed */}
       <style>{`:root { --node-w: ${NODE_WIDTH}px; --node-h: ${NODE_HEIGHT}px; }`}</style>
     </div>
   );

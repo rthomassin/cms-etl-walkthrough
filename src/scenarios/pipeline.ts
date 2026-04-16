@@ -98,3 +98,25 @@ export function stageBounds(stage: 'source' | 'cleaning' | 'consolidation' | 'up
     maxY: Math.max(...ys) + NODE_HEIGHT,
   };
 }
+
+/** Nodes that feed INTO the given node (edges ending at it). */
+export function getPredecessors(nodeId: number): number[] {
+  return pipelineEdges.filter(e => e.to === nodeId).map(e => e.from);
+}
+
+/** Nodes that the given node feeds INTO (edges starting from it). */
+export function getSuccessors(nodeId: number): number[] {
+  return pipelineEdges.filter(e => e.from === nodeId).map(e => e.to);
+}
+
+/** Finds the index of the step in a scenario whose destination is the given
+ *  node. Returns -1 if the scenario doesn't visit that node. When multiple
+ *  steps land at the same node (e.g., the settle step that re-arrives at 13),
+ *  the *first* occurrence is returned — that's the step that "explains" the
+ *  node's action. */
+export function findStepIndexForNode(
+  steps: Array<{ to: number }>,
+  nodeId: number
+): number {
+  return steps.findIndex(s => s.to === nodeId);
+}
