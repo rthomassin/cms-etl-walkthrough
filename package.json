@@ -10,7 +10,8 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "npm run build && wrangler deploy",
+    "ship": "npm run build && git add -u && git commit --allow-empty -m \"chore: manual deploy\" && git pull --no-rebase --no-edit && git push"
   },
   "dependencies": {
     "@xyflow/react": "^12.10.2",
