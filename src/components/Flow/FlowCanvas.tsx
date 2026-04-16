@@ -3,11 +3,15 @@ import { ReactFlow, Background, type Node, type Edge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { pipelineNodes, pipelineEdges } from '../../scenarios/pipeline';
 import StageNode, { type StageNodeData } from './StageNode';
+import Token from './Token';
 import { useStore, getActiveScenario } from '../../engine/store';
+import { useScheduler } from '../../engine/scheduler';
 
 const nodeTypes = { stage: StageNode };
 
 export default function FlowCanvas() {
+  useScheduler();
+
   const stepIndex = useStore(s => s.stepIndex);
   const activeScenarioId = useStore(s => s.activeScenario);
 
@@ -46,7 +50,7 @@ export default function FlowCanvas() {
   );
 
   return (
-    <div className="w-full h-[calc(100vh-60px)] bg-surface">
+    <div className="relative w-full h-[calc(100vh-60px)] bg-surface">
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -61,6 +65,7 @@ export default function FlowCanvas() {
       >
         <Background gap={24} />
       </ReactFlow>
+      <Token />
     </div>
   );
 }
