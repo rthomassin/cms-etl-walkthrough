@@ -34,10 +34,9 @@ export function useScheduler() {
       const sc = getActiveScenario();
       const idx = store.stepIndex;
 
-      if (!store.playing || idx >= sc.steps.length) {
-        if (!store.playing || idx >= sc.steps.length) {
-          if (idx >= sc.steps.length) store.actions.pause();
-        }
+      if (!store.playing) return;
+      if (idx >= sc.steps.length) {
+        store.actions.pause();
         return;
       }
 
